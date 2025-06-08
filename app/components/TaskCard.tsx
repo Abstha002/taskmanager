@@ -28,7 +28,16 @@ export default function TaskCard({tasks,toggleTask}:ITaskCardProps){
             <div>Title: {task.title}</div>
             <div>Description: {task.description}</div>
             <div>Completed: {task.completed ? "Yes" : "No"}</div>
-            <Link href={`/task/${task.id}`}>Go to particular page</Link>
+            <Link href={{
+                pathname: `/task/${task.id}`,
+                query: {
+                title: task.title,
+                description: task.description,
+                completed: task.completed.toString(),
+                },
+            }}>
+                Go to particular page
+            </Link>
           </React.Fragment>
           </li>
 

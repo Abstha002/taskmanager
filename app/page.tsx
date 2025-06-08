@@ -1,6 +1,8 @@
 "use client"
 import {useEffect, useState} from "react"
 import React from "react"
+import TaskCard from "./components/TaskCard"
+
 interface ITask{
     id:number,
     title:string,
@@ -11,29 +13,63 @@ interface Iinput{
   title:string,
   description:string
 }
-export default function Home() {
 
+
+export default function Home() {
   const [tasks,setTask]=useState<ITask[]>([])
   const [input,setInput]=useState<Iinput>({title:'',description:''})
+//  first version
+  // const addTask=()=>{
+  //   if(input.title.trim()===''||input.description.trim()==='') return;
+  //   const newTask:ITask={
+  //     id:Date.now(),
+  //     title:input.title,
+  //     description:input.description,
+  //     completed:false
+  //   }
+  //   setTask([newTask,...tasks])
+  //   setInput({title:'',description:''})
+  // }
 
-  const addTask=()=>{
-    if(input.title.trim()===''||input.description.trim()==='') return;
-    const newTask:ITask={
-      id:Date.now(),
-      title:input.title,
-      description:input.description,
-      completed:false
-    }
-    setTask([newTask,...tasks])
-    setInput({title:'',description:''})
-  }
+  // second
+  const addTask = async () => {
+    if (input.title.trim() === '' || input.description.trim() === '') return;
 
+    const newTask: ITask = {
+      id: Date.now(),
+      title: input.title,
+      description: input.description,
+      completed: false
+    };
+
+    const res = await fetch("/api/tasks", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(newTask)
+  });
+
+  const savedTask = await res.json();
+  setTask([savedTask, ...tasks]);
+  setInput({ title: '', description: '' });
+  };
+
+  //first version
   const toggleTask=(id:number)=>{
     setTask(
       tasks.map(task => task.id === id ? { ...task, completed: !task.completed}:task)
     )
   }
 
+  useEffect(() => {
+  const fetchTasks = async () => {
+    const res = await fetch("/api/tasks");
+    const data = await res.json();
+    setTask(data);
+  };
+  fetchTasks();
+}, []);
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
@@ -61,7 +97,10 @@ export default function Home() {
         </button>
       </div>
 
-      <ul className="space-y-2">
+
+      <TaskCard tasks={tasks} toggleTask={toggleTask}/> 
+
+      {/* <ul className="space-y-2">
         {tasks.map((task) => (
           <li
             key={task.id}
@@ -79,7 +118,7 @@ export default function Home() {
           </li>
 
         ))}
-      </ul>
+      </ul> */}
       </main>
     </div>
   );
